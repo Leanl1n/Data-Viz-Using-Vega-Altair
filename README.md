@@ -1,5 +1,3 @@
-# streamlit-data-viz/streamlit-data-viz/README.md
-
 # Streamlit Data Visualization Project
 
 This project is a Streamlit application designed to visualize data related to Philippine Airlines mentions in media coverage. It processes data from an Excel file and generates various charts to provide insights into brand volume and sentiment analysis.
