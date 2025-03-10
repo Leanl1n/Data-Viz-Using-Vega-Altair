@@ -1,20 +1,7 @@
-streamlit-data-viz
-├── src
-│   ├── app.py
-│   ├── display_components.py
-│   ├── excel_handler.py
-│   ├── chart_creator.py
-│   ├── config_loader.py
-│   └── utils
-│       └── helpers.py
-├── data
-│   └── PAL Excel Template (initial draft ver 1.0).xlsx
-├── requirements.txt
-│   └── streamlit>=1.10.0
-│   └── pandas>=1.3.0
-│   └── openpyxl>=3.0.0
-│   └── plotly>=5.3.0
-│   └── numpy>=1.21.0
-│   └── altair>=5.0.0
-│   └── vega_datasets>=0.9.0
-└── README.md
+streamlit>=1.10.0
+pandas>=1.3.0
+openpyxl>=3.0.0
+plotly>=5.3.0
+numpy>=1.21.0
+altair>=5.0.0
+vega_datasets>=0.9.0
