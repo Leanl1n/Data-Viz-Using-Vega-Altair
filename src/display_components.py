@@ -150,7 +150,7 @@ def display_airlines_overview(handler):
 def display_prominence_score_df(handler, keyword):
     """
     Display prominence score data and chart
-    Args:
+    Args:x`
         handler: ExcelFileHandler instance
         keyword: Primary keyword to analyze
         secondary_keyword: Secondary keyword (alias) to include
@@ -158,13 +158,26 @@ def display_prominence_score_df(handler, keyword):
     st.subheader("Prominence Score Analysis")
     
     # Get prominence score data with both keywords
-    prominence_df = handler.prominence_score(keyword)
+    prominence_df_whole = handler.prominence_score(keyword)
+    st.dataframe(prominence_df_whole, hide_index=True)
+
+def display_prominence_score_extra(handler, keyword):
+    """
+    Display prominence score data and chart
+    Args:
+        handler: ExcelFileHandler instance
+        keyword: Primary keyword to analyze
+        secondary_keyword: Secondary keyword (alias) to include
+    """
+    st.subheader("Prominence Data Frame")
     
+    # Create two columns for layout
     col1, col2 = st.columns(COLUMN_RATIO)
     
     with col1:
-        st.dataframe(prominence_df, hide_index=True, width=DATAFRAME_WIDTH)
-        
+        prominence_df_whole = handler.prominence_score_extra(keyword)
+        st.dataframe(prominence_df_whole, hide_index=True, width=DATAFRAME_WIDTH)
+    
     with col2:
-        prominence_chart = ChartCreator.create_prominence_score_chart(prominence_df)
+        prominence_chart = ChartCreator.create_prominence_score_chart_extra(prominence_df_whole)
         st.altair_chart(prominence_chart, use_container_width=True, theme=None)
