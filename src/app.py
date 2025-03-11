@@ -9,7 +9,8 @@ from display_components import (
     display_brand_comparison,
     display_pie_to_pie_analysis,
     display_airlines_overview,
-    display_prominence_score_df
+    display_prominence_score_df,
+    display_prominence_score_extra,
 )
 
 # Load keywords
@@ -24,6 +25,7 @@ selected_keyword5 = keyword_list[4] if len(keyword_list) > 4 else None  # CebPac
 selected_keyword6 = keyword_list[5] if len(keyword_list) > 5 else None  # AirAsia
 combined_keywords = [selected_keyword1, selected_keyword2]
 combined_keywords1 = [selected_keyword3, selected_keyword5]
+combined_keywords2 = [selected_keyword4, selected_keyword6]
 
 def display_general_overview(handler, df):
     """Display general data overview sections"""
@@ -39,7 +41,10 @@ def display_general_overview(handler, df):
     display_airlines_overview(handler)
 
     # Prominece Score
-    display_prominence_score_df(handler, combined_keywords1)
+    display_prominence_score_df(handler, [combined_keywords, combined_keywords1, combined_keywords2])
+
+    # Prominence Score Extra
+    display_prominence_score_extra(handler, [combined_keywords, combined_keywords1, combined_keywords2])
 
 def display_pal_analysis(handler):
     """Display Philippine Airlines specific analysis"""
