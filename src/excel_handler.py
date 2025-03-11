@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit as st
 from chart_creator import ChartCreator
 from config_loader import get_keywords
+from config_loader import get_sites_by_type
 
 # Load keywords
 keyword_list = get_keywords()
@@ -12,6 +13,13 @@ selected_keyword3 = keyword_list[2] if len(keyword_list) > 2 else None
 selected_keyword4 = keyword_list[3] if len(keyword_list) > 3 else None
 selected_keyword5 = keyword_list[4] if len(keyword_list) > 4 else None
 selected_keyword6 = keyword_list[5] if len(keyword_list) > 5 else None
+
+site_list_print = get_sites_by_type("Print")
+site_list_broadcast = get_sites_by_type("Broadcast")
+site_list_blog = get_sites_by_type("Blog")
+site_list_social_media = get_sites_by_type("Social Media")
+
+print(site_list_social_media)
 
 class ExcelFileHandler:
     def __init__(self, file, sheet_name):
@@ -302,12 +310,12 @@ class ExcelFileHandler:
     # Prominence Score
     def prominence_score(self, keywords, *extra_keywords):
         """
-        Calculate prominence scores and return as DataFrame
+        Calculate prominence scores and return as DataFrame with all original columns plus scores
         Args:
             keywords: Primary keyword or list of keywords
             *extra_keywords: Additional keywords to include in the analysis
         Returns:
-            DataFrame with prominence scores for the specified keywords
+            DataFrame with all original columns and prominence scores for each keyword
         """
         if self.dataframe is None:
             self.open_excel_file()
@@ -327,53 +335,112 @@ class ExcelFileHandler:
                     for k in all_keywords if k is not None]
         
         if not all_keywords:
-            return pd.DataFrame(columns=['Date', 'Headline', 'Keywords', 'Prominence Score'])
+            return pd.DataFrame(columns=df.columns)
         
-        # Calculate prominence scores for all rows
-        def calculate_score(row):
+        def calculate_keyword_score(row, keyword_set):
             # Convert text fields to lowercase strings for comparison
             headline = str(row['Headline']).lower()
             opening_text = str(row['Opening Text']).lower()
             hit_sentence = str(row['Hit Sentence']).lower()
             
-            max_score = 0.0
+            # Handle both string and list keywords
+            if isinstance(keyword_set, str):
+                keyword_set = [keyword_set]
             
-            # Check each keyword combination against each text field
-            for keyword_set in all_keywords:
-                # Handle both string and list keywords
-                if isinstance(keyword_set, str):
-                    keyword_set = [keyword_set]
-                
-                # Calculate score for current keyword set
-                current_score = 0.0
-                if any(keyword.lower() in headline for keyword in keyword_set):
-                    current_score = 1.0
-                elif any(keyword.lower() in opening_text for keyword in keyword_set):
-                    current_score = 0.7
-                elif any(keyword.lower() in hit_sentence for keyword in keyword_set):
-                    current_score = 0.1
-                
-                # Update max_score if current_score is higher
-                max_score = max(max_score, current_score)
-            
-            return max_score
+            # Calculate score for current keyword set
+            if any(keyword.lower() in headline for keyword in keyword_set):
+                return 1.0
+            elif any(keyword.lower() in opening_text for keyword in keyword_set):
+                return 0.7
+            elif any(keyword.lower() in hit_sentence for keyword in keyword_set):
+                return 0.1
+            return 0.0
         
-        # Apply scoring to all rows
-        df['Prominence Score'] = df.apply(calculate_score, axis=1)
+        # Calculate scores for each keyword
+        for idx, keyword in enumerate(all_keywords):
+            column_name = str(idx + 1)  # Just use numbers for temporary column names
+            df[column_name] = df.apply(lambda row: calculate_keyword_score(row, keyword), axis=1)
         
-        # Filter out rows with zero scores
-        result_df = df[df['Prominence Score'] > 0].copy()
+        # Calculate maximum score across all keywords for filtering
+        score_columns = [str(i+1) for i in range(len(all_keywords))]
+        max_score = df[score_columns].max(axis=1)
+        
+        # Filter out rows with zero scores while keeping all columns
+        result_df = df[max_score > 0].copy()
         
         if result_df.empty:
-            return pd.DataFrame(columns=['Date', 'Headline', 'Keywords', 'Prominence Score'])
-        
-        # Select and format relevant columns
-        result_df = result_df[['Date', 'Headline', 'Keywords', 'Prominence Score']].copy()
+            return pd.DataFrame(columns=df.columns)
         
         # Format date column
         result_df['Date'] = pd.to_datetime(result_df['Date']).dt.strftime('%Y-%m-%d')
         
-        # Sort by prominence score descending
-        result_df = result_df.sort_values('Prominence Score', ascending=False).reset_index(drop=True)
+        # Sort by maximum score descending
+        result_df = result_df.sort_values(by=score_columns, ascending=False).reset_index(drop=True)
+        
+        # Rename score columns to keyword names
+        rename_dict = {str(idx + 1): kw if isinstance(kw, str) else f"Keyword {idx + 1} Prominence Score"
+                    for idx, kw in enumerate(all_keywords)}
+        result_df = result_df.rename(columns=rename_dict)
         
         return result_df
+    
+    def prominence_score_extra(self, keywords, *extra_keywords):
+        """
+        Calculate total prominence scores and average per article for each keyword
+        Args:
+            keywords: Primary keyword or list of keywords
+            *extra_keywords: Additional keywords to include in the analysis
+        Returns:
+            DataFrame with keywords, their total prominence scores, and average per article
+        """
+        if self.dataframe is None:
+            self.open_excel_file()
+
+        # Ensure keywords is a list 
+        if isinstance(keywords, str):
+            keywords = [keywords]
+        
+        # Add extra keywords
+        all_keywords = keywords + list(extra_keywords)
+        
+        # Filter out None values and convert to lowercase
+        all_keywords = [k.lower() if isinstance(k, str) else [kw.lower() for kw in k] 
+                    for k in all_keywords if k is not None]
+        
+        if not all_keywords:
+            return pd.DataFrame(columns=['Keyword', 'Total Prominence', 'Average Prominence'])
+
+        def calculate_keyword_score(text_fields, keyword_set):
+            if isinstance(keyword_set, str):
+                keyword_set = [keyword_set]
+            
+            headline, opening_text, hit_sentence = text_fields
+            
+            if any(keyword.lower() in str(headline).lower() for keyword in keyword_set):
+                return 1.0
+            elif any(keyword.lower() in str(opening_text).lower() for keyword in keyword_set):
+                return 0.7
+            elif any(keyword.lower() in str(hit_sentence).lower() for keyword in keyword_set):
+                return 0.1
+            return 0.0
+
+        results = []
+        for keyword in all_keywords:
+            # Calculate scores for each article
+            scores = [calculate_keyword_score(
+                (row['Headline'], row['Opening Text'], row['Hit Sentence']), 
+                keyword) for _, row in self.dataframe.iterrows()]
+            
+            # Calculate total and filter non-zero scores for average
+            total_score = sum(scores)
+            non_zero_scores = [s for s in scores if s > 0]
+            avg_score = round(total_score / len(non_zero_scores), 2) if non_zero_scores else 0
+            
+            keyword_name = (keyword[0] if isinstance(keyword, list) else keyword).title()
+            results.append({
+                'Keyword': keyword_name, 
+                'Total Prominence': round(total_score, 2),
+                'Average Prominence': avg_score
+            })
+
+        return pd.DataFrame(results)
