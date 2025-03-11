@@ -315,45 +315,70 @@ class ChartCreator:
         )
         
         return chart
-    
+
     @staticmethod
-    def create_prominence_score_chart(df):
-        """Create a chart showing prominence scores distribution"""
-        # Create bins for prominence scores
-        df_processed = df.copy()
-        df_processed['Prominence Level'] = pd.cut(
-            df_processed['Prominence Score'],
-            bins=[0, 0.1, 0.7, 1.0],
-            labels=['Low', 'Medium', 'High']
+    def create_prominence_score_chart_extra(df):
+        """Create a bar chart showing prominence scores with average line using Altair"""
+        # Create the base encoding for bars
+        base_bars = alt.Chart(df).encode(
+            x=alt.X('Keyword:N', sort=None, title=None, axis=alt.Axis(labelAngle=0)),
+            y=alt.Y('Total Prominence:Q', 
+                    title=None),
+            # Add color encoding for bars
+            color=alt.Color('Keyword:N',
+                           scale=alt.Scale(
+                               range=['#ff0000', '#039482', '#001F60']
+                           ),
+                           legend=alt.Legend(title='Keywords'))
         )
 
-        # Count occurrences for each prominence level
-        prominence_counts = df_processed['Prominence Level'].value_counts().reset_index()
-        prominence_counts.columns = ['Level', 'Count']
-
-        # Create the bar chart
-        chart = alt.Chart(prominence_counts).mark_bar().encode(
-            y=alt.Y('Level:N', 
-                    title=None,
-                    sort=['High', 'Medium', 'Low']),
-            x=alt.X('Count:Q', 
-                    title='Number of Articles'),
-            color=alt.Color('Level:N',
-                        scale=alt.Scale(
-                            domain=['Low', 'Medium', 'High'],
-                            range=['#95a5a6', '#f1c40f', '#e74c3c']
-                        )),
+        # Create bars with dynamic colors
+        bars = base_bars.mark_bar().encode(
             tooltip=[
-                alt.Tooltip('Level:N', title='Prominence'),
-                alt.Tooltip('Count:Q', title='Number of Articles')
+                alt.Tooltip('Keyword:N'),
+                alt.Tooltip('Total Prominence:Q', format='.2f'),
+                alt.Tooltip('Average Prominence:Q', format='.2f')
             ]
+        )
+
+        # Create separate encoding for line
+        base_line = alt.Chart(df).encode(
+            x=alt.X('Keyword:N', sort=None),
+            y=alt.Y('Average Prominence:Q',
+                title=None,
+                axis=alt.Axis(titleColor='red'))
+        )
+
+        # Create line
+        line = base_line.mark_line(
+            color='black'
+        )
+
+        # Create points for the line
+        points = base_line.mark_circle(
+            color='red',
+            size=50
+        )
+
+        # Create text labels
+        text = base_line.mark_text(
+            align='center',
+            baseline='bottom',
+            dy=-5,
+            color='red'
+        ).encode(
+            text=alt.Text('Average Prominence:Q', format='.2f')
+        )
+
+        # Layer the bars and line charts with different scales
+        chart = alt.layer(bars, line + points + text).resolve_scale(
+            y='independent'
         ).properties(
             width=600,
             height=400,
-            title='Prominence Score Distribution'
         ).configure_axis(
             labelFontSize=12,
             titleFontSize=14
         )
-        
+
         return chart
