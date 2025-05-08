@@ -46,12 +46,7 @@ class ExcelFileHandler:
         if self.dataframe is None:
             self.open_excel_file()
 
-        # Ensure keywords is a list
-        if isinstance(keywords, str):
-            keywords = [keywords]
-
-        # Add extra keywords if provided
-        keywords.extend(extra_keywords)
+        keywords = normalize_keywords(keywords, *extra_keywords)
 
         # Case-insensitive check for multiple keywords
         return self.dataframe['Keywords'].apply(lambda x: any(k.lower() in x.lower() for k in keywords)).sum()
