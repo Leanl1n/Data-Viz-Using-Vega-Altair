@@ -33,6 +33,13 @@ class ExcelFileHandler:
             return self.dataframe
         except Exception as e:
             raise Exception(f"Failed to read Excel file: {str(e)}")
+            
+    def normalize_keywords(keywords, *extra_keywords):
+        if isinstance(keywords, str):
+            keywords = [keywords]
+        keywords = list(keywords)  # In case it's a tuple
+        keywords.extend(extra_keywords)
+        return [k.lower() for k in keywords]
         
     # Total articles in Keyword column - Media Coverage
     def get_total_articles_keywords(self, keywords, *extra_keywords):
