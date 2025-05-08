@@ -119,15 +119,13 @@ class ExcelFileHandler:
         filtered_rows = self.dataframe[mask]
 
         # Count sentiment occurrences
-        positive = filtered_rows[filtered_rows['Sentiment'] == 'Positive'].shape[0]
-        neutral = filtered_rows[filtered_rows['Sentiment'] == 'Neutral'].shape[0]
-        negative = filtered_rows[filtered_rows['Sentiment'] == 'Negative'].shape[0]
-
-        # Create sentiment pie chart
-        sizes = [positive, neutral, negative]
-        ChartCreator.create_sentiment_pie_chart(sizes)
-
-        return {'Positive': positive, 'Neutral': neutral, 'Negative': negative}
+        sentiment_counts = {
+            'Positive': filtered_rows[filtered_rows['Sentiment'] == 'Positive'].shape[0],
+            'Neutral': filtered_rows[filtered_rows['Sentiment'] == 'Neutral'].shape[0],
+            'Negative': filtered_rows[filtered_rows['Sentiment'] == 'Negative'].shape[0]
+        }
+    
+            return sentiment_counts
     
     # Daily trendline
     def count_daily_trendline(self, keywords, *extra_keywords):
