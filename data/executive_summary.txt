@@ -1,0 +1,18 @@
+EXECUTIVE SUMMARY
+Sample Dashboard using Streamlit and Vega Altair
+
+This report gives an overview of media coverage and sentiment across the monitored period, with brief interpretation and recommendations for communications and brand strategy.
+
+OVERVIEW
+The dataset covers media items tracked across headline, date, sentiment, reach, AVE, source, and influencer. The analysis helps assess share of voice, narrative tone, and which outlets and authors drive coverage.
+
+BRAND PRESENCE & SENTIMENT
+Brand mention volume and sentiment distribution show who is leading in earned media and how coverage is framed (positive, neutral, negative). Tracking these over time highlights the impact of campaigns, announcements, or reputational events. A balanced or positive sentiment mix supports brand health; a high share of negative coverage warrants a closer look at themes and response strategy.
+
+SOURCES & INFLUENCERS
+Coverage is spread across multiple sources, with a small set of outlets often driving most of the volume. Top sources and authors shape reach and narrative, so relationship-building and response capacity with these players matter. Identifying which outlets tend to frame coverage positively helps prioritise outreach and exclusive or early briefings.
+
+REACH & VALUE
+Cumulative reach and advertising value equivalent (AVE) summarise the audience exposure and comparable value of earned media. Reporting these alongside sentiment and share of voice supports business cases for PR and communications and helps benchmark performance after major campaigns or crises.
+
+Recommendation: Maintain ongoing share-of-voice and sentiment tracking by brand; use the dashboard to spot spikes and tie them to specific events or campaigns. Run a qualitative pass on high-reach negative items to extract themes and align messaging with outlets that frame coverage positively. Prioritise relationship-building with top-tier sources and report reach and AVE in regular dashboards to demonstrate impact.

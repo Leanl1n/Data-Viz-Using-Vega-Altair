@@ -1,4 +1,4 @@
-"""Entry point for the Streamlit app. Run from project root: python run.py"""
+"""Entry point for the Sample Dashboard (Streamlit + Vega Altair). Run from project root: python run.py"""
 
 import os
 import subprocess

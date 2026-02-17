@@ -126,28 +126,65 @@ class ChartCreator:
 
     @staticmethod
     def create_daily_trendline_chart(
-        daily_counts: pd.DataFrame, color_key: str
+        daily_counts: pd.DataFrame,
+        color_key: str,
+        smoothed_series: pd.Series | None = None,
+        trend_series: pd.Series | None = None,
     ) -> alt.Chart:
-        """Build an Altair line chart for daily counts with top-3 peak labels."""
+        """Build an Altair line chart for daily counts with optional smoothing and trend line."""
         color = COLOR_MAPPING.get(color_key, "#001F60")
         df = daily_counts.copy()
+        if smoothed_series is not None:
+            df = df.assign(Smoothed=smoothed_series.values)
+        if trend_series is not None:
+            df = df.assign(Trend=trend_series.values)
+
         top_3 = df.nlargest(3, "Count")
         base = alt.Chart(df).encode(
             x=alt.X("Date:N", axis=alt.Axis(labelAngle=45, title=None)),
-            y=alt.Y("Count:Q", axis=alt.Axis(title=None)),
+            y=alt.Y("Count:Q", axis=alt.Axis(title="Article count")),
         )
         line = base.mark_line(color=color, strokeWidth=2)
-        points = base.mark_circle(color="#001F60", size=100)
+        points = base.mark_circle(color=color, size=80, opacity=0.9)
         peak_labels = (
             alt.Chart(top_3)
-            .mark_text(align="left", baseline="bottom", dx=5, dy=-10, fontSize=12, color="red")
-            .encode(x="Date:N", y="Count:Q", text=alt.Text("Count:Q", format=".0f"))
+            .mark_text(
+                align="left", baseline="bottom", dx=5, dy=-10, fontSize=11, color="#64748b"
+            )
+            .encode(
+                x="Date:N",
+                y="Count:Q",
+                text=alt.Text("Count:Q", format=".0f"),
+                tooltip=[alt.Tooltip("Date:N"), alt.Tooltip("Count:Q")],
+            )
         )
+        layer = line + points + peak_labels
+
+        if "Smoothed" in df.columns:
+            smooth_base = alt.Chart(df).encode(
+                x=alt.X("Date:N"),
+                y=alt.Y("Smoothed:Q"),
+                tooltip=[alt.Tooltip("Date:N"), alt.Tooltip("Smoothed:Q", format=".2f")],
+            )
+            layer = layer + smooth_base.mark_line(
+                color="#f59e0b", strokeWidth=2.5, strokeDash=[4, 2]
+            )
+
+        if "Trend" in df.columns:
+            trend_base = alt.Chart(df).encode(
+                x=alt.X("Date:N"),
+                y=alt.Y("Trend:Q"),
+                tooltip=[alt.Tooltip("Date:N"), alt.Tooltip("Trend:Q", format=".2f")],
+            )
+            layer = layer + trend_base.mark_line(
+                color="#dc2626", strokeWidth=2, strokeDash=[6, 3]
+            )
+
         return (
-            (line + points + peak_labels)
-            .properties(width=600, height=400)
+            layer.properties(width=700, height=380)
             .configure_axis(grid=True, gridColor="#EAEAEA")
             .configure_view(strokeWidth=0)
+            .configure_legend(orient="bottom")
             .interactive()
         )
 

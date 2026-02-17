@@ -1,15 +1,17 @@
-# Data Visualization Using Streamlit and Altair
+# Sample Dashboard using Streamlit and Vega Altair
 
-Streamlit application for media coverage and sentiment analysis. Reads an Excel dataset and provides interactive views: brand comparison, sentiment breakdowns, daily trendlines, top publications and authors, and prominence scores.
+A sample Streamlit dashboard for media coverage and sentiment analysis, with charts built using Vega Altair. Reads an Excel dataset and provides interactive views: brand comparison, sentiment breakdowns, daily trendlines, top publications and authors, and prominence scores.
 
 ## Project structure
 
 ```
 Data-Viz-Using-Vega-Altair/
 ├── run.py                 # Entry point: run from project root
-├── config.json            # Keywords and optional media config
 ├── requirements.txt
 ├── data/
+│   ├── config.json        # Keywords and optional media config
+│   ├── dashboard.css      # Custom dashboard styles (optional)
+│   ├── executive_summary.txt
 │   └── PAL Excel Template (initial draft ver 1.0).xlsx
 └── src/
     ├── app.py              # Streamlit UI and tab layout (only file at this level)
@@ -35,7 +37,7 @@ Data-Viz-Using-Vega-Altair/
    pip install -r requirements.txt
    ```
 
-3. Ensure `config.json` exists at the project root (e.g. with a `keywords` list). Optionally place the default Excel file under `data/` as in the structure above.
+3. Ensure `data/config.json` exists (e.g. with a `keywords` list). Optionally place the default Excel file under `data/` as in the structure above.
 
 ## Run
 

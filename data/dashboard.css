@@ -1,0 +1,105 @@
+/* Base */
+.main .block-container {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+    max-width: 1320px;
+}
+/* Title */
+h1 {
+    color: #0f172a;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    font-size: 1.75rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+h2 {
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 1.15rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+h3 { color: #334155; font-weight: 600; font-size: 1rem; }
+/* KPI metric cards */
+[data-testid="stMetricValue"] {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+[data-testid="stMetric"] label {
+    font-size: 0.8rem !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+}
+div[data-testid="stVerticalBlock"] > div:has([data-testid="stMetric"]) {
+    background: #ffffff;
+    padding: 1.25rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+/* Sidebar */
+[data-testid="stSidebar"] {
+    background: #f8fafc;
+    border-right: 1px solid #e2e8f0;
+}
+[data-testid="stSidebar"] .stMarkdown { color: #334155; }
+[data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2 { color: #1e293b; }
+[data-testid="stSidebar"] label { color: #64748b !important; }
+/* Tabs */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 0;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 0.5rem;
+}
+.stTabs [data-baseweb="tab"] {
+    padding: 0.65rem 1.25rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #64748b;
+}
+.stTabs [aria-selected="true"] {
+    color: #0f172a;
+    border-bottom: 2px solid #0f172a;
+    margin-bottom: -1px;
+}
+/* Expanders */
+div[data-testid="stExpander"] {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fafafa;
+}
+/* Dividers */
+hr { margin: 1.5rem 0; border-color: #e2e8f0; }
+/* Dataframes */
+[data-testid="stDataFrame"] { border-radius: 8px; overflow: hidden; }
+
+/* Executive summary box */
+.exec-summary-box {
+    background: #fafbfc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.35rem 1.5rem;
+    margin: 0.5rem 0 1rem 0;
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: #334155;
+    font-family: system-ui, -apple-system, sans-serif;
+    max-height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+}
+
+/* Executive summary note callout */
+.exec-summary-note {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 6px;
+    padding: 0.65rem 1rem;
+    margin: 0.5rem 0 1rem 0;
+    font-size: 0.8125rem;
+    color: #92400e;
+    font-weight: 500;
+}

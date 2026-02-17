@@ -1,5 +1,6 @@
 """Streamlit UI components for data overview and airline analysis."""
 
+import numpy as np
 import pandas as pd
 import streamlit as st
 
@@ -61,15 +62,91 @@ def display_sentiment_analysis(handler: ExcelFileHandler, keyword: str) -> None:
 def display_daily_trendline(
     handler: ExcelFileHandler, keyword: str, color_key: str
 ) -> None:
-    """Render daily trendline table and chart for one keyword."""
+    """Render daily trendline with slider (time window), smoothing, and trend line."""
     st.subheader("Daily Trendline")
     daily = handler.count_daily_trendline(keyword)
+    n_total = len(daily)
+    if n_total == 0:
+        st.warning("No daily data for this keyword.")
+        return
+
+    key_suffix = keyword.replace(" ", "_").replace(".", "_") if keyword else "trend"
+    with st.expander("Trendline controls", expanded=True):
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            window_options = [
+                ("All", n_total),
+                ("Last 30 days", min(30, n_total)),
+                ("Last 14 days", min(14, n_total)),
+                ("Last 7 days", min(7, n_total)),
+            ]
+            window_labels = [f"{label} ({n} points)" for label, n in window_options]
+            window_idx = st.selectbox(
+                "Time window",
+                range(len(window_options)),
+                format_func=lambda i: window_labels[i],
+                help="Limit the range of dates shown on the chart.",
+                key=f"trendline_window_{key_suffix}",
+            )
+            n_show = window_options[window_idx][1]
+        with c2:
+            smooth_options = ["None", "3-day rolling average", "7-day rolling average"]
+            smooth_choice = st.selectbox(
+                "Smoothing",
+                smooth_options,
+                help="Overlay a moving average to reduce noise.",
+                key=f"trendline_smooth_{key_suffix}",
+            )
+        with c3:
+            show_trend = st.checkbox(
+                "Show trend line (linear fit)",
+                value=False,
+                help="Display a linear regression trend line.",
+                key=f"trendline_show_trend_{key_suffix}",
+            )
+
+    # Apply time window (last n points)
+    daily_view = daily.tail(n_show).reset_index(drop=True)
+    smoothed_series = None
+    trend_series = None
+
+    if smooth_choice == "3-day rolling average":
+        window = 3
+        s = daily["Count"].rolling(window=window, min_periods=1).mean()
+        smoothed_series = s.tail(n_show).reset_index(drop=True)
+    elif smooth_choice == "7-day rolling average":
+        window = 7
+        s = daily["Count"].rolling(window=window, min_periods=1).mean()
+        smoothed_series = s.tail(n_show).reset_index(drop=True)
+
+    if show_trend and len(daily_view) >= 2:
+        x = np.arange(len(daily_view))
+        y = daily_view["Count"].values
+        coeffs = np.polyfit(x, y, 1)
+        trend_series = pd.Series(np.polyval(coeffs, x))
+
     col1, col2 = st.columns(COLUMN_RATIO)
     with col1:
-        st.dataframe(daily, hide_index=True, width=DATAFRAME_DISPLAY_WIDTH)
+        st.caption("Data (filtered by time window)")
+        st.dataframe(daily_view, hide_index=True, width=DATAFRAME_DISPLAY_WIDTH)
+        if show_trend and trend_series is not None and len(daily_view) >= 2:
+            slope = np.polyfit(np.arange(len(daily_view)), daily_view["Count"], 1)[0]
+            st.caption(f"Trend slope: **{slope:+.2f}** articles/day")
     with col2:
-        chart = ChartCreator.create_daily_trendline_chart(daily, color_key)
+        chart = ChartCreator.create_daily_trendline_chart(
+            daily_view,
+            color_key,
+            smoothed_series=smoothed_series,
+            trend_series=trend_series,
+        )
         st.altair_chart(chart, use_container_width=True, theme=None)
+        if smoothed_series is not None or trend_series is not None:
+            parts = []
+            if smoothed_series is not None:
+                parts.append("Orange dashed: smoothing")
+            if trend_series is not None:
+                parts.append("Red dashed: linear trend")
+            st.caption(" — ".join(parts))
 
 
 def display_top_publications_authors(
@@ -154,10 +231,14 @@ def display_prominence_score_df(
     handler: ExcelFileHandler,
     keyword_groups: list[list[str] | tuple[str, ...]],
 ) -> None:
-    """Render prominence score table for multiple keyword groups."""
-    st.subheader("Prominence Score Analysis")
+    """Render prominence score table for multiple keyword groups (article-level detail)."""
     df = handler.prominence_score(keyword_groups[0], *keyword_groups[1:])
-    st.dataframe(df, hide_index=True)
+    if df.empty:
+        st.caption("No prominence score data.")
+        return
+    with st.expander("Article-level prominence scores (detail)", expanded=False):
+        st.caption("One row per article with prominence score per keyword set.")
+        st.dataframe(df, hide_index=True)
 
 
 def display_prominence_score_extra(
@@ -165,7 +246,7 @@ def display_prominence_score_extra(
     keyword_groups: list[list[str] | tuple[str, ...]],
 ) -> None:
     """Render prominence totals/averages and chart for keyword groups."""
-    st.subheader("Prominence Data Frame")
+    st.subheader("Prominence Summary")
     col1, col2 = st.columns(COLUMN_RATIO)
     with col1:
         extra = handler.prominence_score_extra(keyword_groups[0], *keyword_groups[1:])

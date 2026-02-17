@@ -4,12 +4,12 @@ import json
 import os
 from typing import Any
 
-from ..constants import CONFIG_FILENAME, PROJECT_ROOT
+from ..constants import CONFIG_PATH
 
 
 def load_config(config_path: str | None = None) -> dict[str, Any]:
     """Load the configuration file and return the config dictionary."""
-    path = config_path or os.path.join(PROJECT_ROOT, CONFIG_FILENAME)
+    path = config_path or CONFIG_PATH
     with open(path, encoding="utf-8") as f:
         return json.load(f)
 
