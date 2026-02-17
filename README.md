@@ -1,62 +1,73 @@
-# Streamlit Data Visualization Project
+# Data Visualization Using Streamlit and Altair
 
-This project is a Streamlit application designed to visualize data related to Philippine Airlines mentions in media coverage. It processes data from an Excel file and generates various charts to provide insights into brand volume and sentiment analysis.
+Streamlit application for media coverage and sentiment analysis. Reads an Excel dataset and provides interactive views: brand comparison, sentiment breakdowns, daily trendlines, top publications and authors, and prominence scores.
 
-## Project Structure
+## Project structure
 
 ```
-streamlit-data-viz
-├── src
-│   ├── app.py               # Main entry point for the Streamlit application
-│   ├── chart_creator.py     # Contains the ChartCreator class for generating charts
-│   ├── excel_handler.py     # Contains the ExcelFileHandler class for processing Excel data
-│   └── utils
-│       └── helpers.py       # Utility functions for data processing and formatting
-├── data
-│   └── PAL Excel Template (initial draft ver 1.0).xlsx  # Excel file with data
-├── requirements.txt         # Python dependencies for the project
-└── README.md                # Project documentation
+Data-Viz-Using-Vega-Altair/
+├── run.py                 # Entry point: run from project root
+├── config.json            # Keywords and optional media config
+├── requirements.txt
+├── data/
+│   └── PAL Excel Template (initial draft ver 1.0).xlsx
+└── src/
+    ├── app.py              # Streamlit UI and tab layout (only file at this level)
+    └── modules/
+        ├── constants.py    # Paths, sheet name, columns, colors, copy
+        ├── chart_creator.py
+        ├── display_components.py
+        ├── reader/
+        │   ├── __init__.py
+        │   ├── config_loader.py
+        │   └── excel_handler.py
+        └── utils/
+            ├── __init__.py
+            └── helpers.py
 ```
 
-## Setup Instructions
+## Setup
 
-1. Clone the repository:
-   ```
-   git clone <repository-url>
-   cd streamlit-data-viz
-   ```
+1. Clone the repo and go to the project root.
+2. Create a virtual environment (recommended) and install dependencies:
 
-2. Install the required dependencies:
-   ```
+   ```bash
    pip install -r requirements.txt
    ```
 
-3. Run the Streamlit application:
-   ```
-   streamlit run src/app.py
-   ```
+3. Ensure `config.json` exists at the project root (e.g. with a `keywords` list). Optionally place the default Excel file under `data/` as in the structure above.
 
-## Usage
+## Run
 
-Once the application is running, you will be able to:
+From the project root:
 
-- View the total number of articles related to Philippine Airlines.
-- See the breakdown of mentions for Philippine Airlines, Cebu Pacific, and AirAsia Philippines.
-- Analyze sentiment distribution (Positive, Neutral, Negative).
-- Visualize daily trends in mentions over time.
-- Interact with various charts generated from the data.
+```bash
+python run.py
+```
+
+Or run Streamlit directly with `src` on `PYTHONPATH`:
+
+```bash
+PYTHONPATH=src streamlit run src/app.py
+```
+
+The app loads the default Excel file from `data/` if present. You can optionally upload another file via the UI; the tooltip on the uploader describes the required Excel columns and sheet name.
+
+## Required Excel format
+
+- **Sheet name:** `1. Dataset`
+- **Columns:** Keywords, Headline, Date, Sentiment, Reach, AVE, Source, Influencer, Opening Text, Hit Sentence
+
+See the in-app tooltip for details.
 
 ## Dependencies
 
-This project requires the following Python packages:
-
-- Streamlit
-- Pandas
-- NumPy
-- Matplotlib
-
-Make sure to install these packages using the `requirements.txt` file provided.
+- streamlit
+- pandas, openpyxl
+- altair, vega_datasets
+- matplotlib
+- numpy
 
 ## License
 
-PROVIDED BY: Learning and Development Team -- RDB
+Provided by: Learning and Development Team — RDB

@@ -1,130 +1,161 @@
+"""Streamlit app for media and sentiment data visualization."""
+
+import os
+
 import streamlit as st
-from excel_handler import ExcelFileHandler
-from config_loader import get_keywords
-from display_components import (
+
+from modules.constants import (
+    DEFAULT_DATA_PATH,
+    DEFAULT_SHEET_NAME,
+    REQUIRED_FIELDS_NOTE,
+    UPLOAD_FILE_TYPES,
+)
+from modules.display_components import (
     display_airline_metrics,
-    display_sentiment_analysis,
-    display_daily_trendline,
-    display_top_publications_authors,
-    display_brand_comparison,
-    display_pie_to_pie_analysis,
     display_airlines_overview,
+    display_brand_comparison,
+    display_daily_trendline,
+    display_pie_to_pie_analysis,
     display_prominence_score_df,
     display_prominence_score_extra,
+    display_sentiment_analysis,
+    display_top_publications_authors,
 )
+from modules.reader import ExcelFileHandler, get_keywords
 
-# Load keywords
-keyword_list = get_keywords()
 
-# Initialize keywords
-selected_keyword1 = keyword_list[0] if len(keyword_list) > 0 else None  # Philippine Airlines
-selected_keyword2 = keyword_list[1] if len(keyword_list) > 1 else None  # PAL
-selected_keyword3 = keyword_list[2] if len(keyword_list) > 2 else None  # Cebu Pacific
-selected_keyword4 = keyword_list[3] if len(keyword_list) > 3 else None  # AirAsia
-selected_keyword5 = keyword_list[4] if len(keyword_list) > 4 else None  # CebPac
-selected_keyword6 = keyword_list[5] if len(keyword_list) > 5 else None  # AirAsia
-combined_keywords = [selected_keyword1, selected_keyword2]
-combined_keywords1 = [selected_keyword3, selected_keyword5]
-combined_keywords2 = [selected_keyword4, selected_keyword6]
+def _build_keyword_vars() -> tuple[
+    str | None, str | None, str | None, str | None, str | None, str | None,
+    list[str], list[str], list[str], list[str],
+]:
+    kw = get_keywords()
+    k1 = kw[0] if len(kw) > 0 else None
+    k2 = kw[1] if len(kw) > 1 else None
+    k3 = kw[2] if len(kw) > 2 else None
+    k4 = kw[3] if len(kw) > 3 else None
+    k5 = kw[4] if len(kw) > 4 else None
+    k6 = kw[5] if len(kw) > 5 else None
+    overview = [k for k in [k1, k3, k4] if k]
+    combined = [k1, k2] if k1 and k2 else (([k1] if k1 else []) + ([k2] if k2 else []))
+    combined1 = [k3, k5] if k3 and k5 else (([k3] if k3 else []) + ([k5] if k5 else []))
+    combined2 = [k4, k6] if k4 and k6 else (([k4] if k4 else []) + ([k6] if k6 else []))
+    return k1, k2, k3, k4, k5, k6, overview, combined, combined1, combined2
 
-def display_general_overview(handler, df):
-    """Display general data overview sections"""
-    st.dataframe(df)
-    
-    # Overall Brand Comparison
-    display_brand_comparison(handler, [selected_keyword1, selected_keyword3, selected_keyword4])
-    
-    # Overall Airlines Overview
-    display_pie_to_pie_analysis(handler)
-    
-    # Overall Pie to Pie Analysis
-    display_airlines_overview(handler)
 
-    # Prominece Score
-    display_prominence_score_df(handler, [combined_keywords, combined_keywords1, combined_keywords2])
+def main() -> None:
+    """Run the Streamlit data visualization app."""
+    st.title("Data Visualization Using Streamlit and Altair")
+    (
+        kw1,
+        kw2,
+        kw3,
+        kw4,
+        kw5,
+        kw6,
+        overview_keywords,
+        combined_keywords,
+        combined_keywords1,
+        combined_keywords2,
+    ) = _build_keyword_vars()
 
-    # Prominence Score Extra
-    display_prominence_score_extra(handler, [combined_keywords, combined_keywords1, combined_keywords2])
-
-def display_pal_analysis(handler):
-    """Display Philippine Airlines specific analysis"""
-    # PAL Metrics
-    display_airline_metrics(handler, selected_keyword1, selected_keyword2)
-    
-    # PAL Sentiment Analysis
-    display_sentiment_analysis(handler, selected_keyword1)
-    
-    # PAL Daily Trendline
-    display_daily_trendline(handler, selected_keyword1, "selected_keyword1_color")
-    
-    # PAL Publications and Authors
-    display_top_publications_authors(handler, selected_keyword1, "selected_keyword1_color")
-
-def display_competitor_analysis(handler, competitor, sec_keyword, color_key):
-    """Display analysis for competitor airlines"""
-    # Competitor Metrics
-    display_airline_metrics(handler, competitor, sec_keyword)
-    
-    # Competitor Sentiment Analysis
-    display_sentiment_analysis(handler, competitor)
-
-    # Competitor Daily Trendline
-    display_daily_trendline(handler, competitor, color_key)
-
-    # Competitor Publications and Authors
-    display_top_publications_authors(handler, competitor, color_key)
-
-def main():
-    st.title("Data Visualization Guide")
-    uploaded_file = st.file_uploader("Upload your Excel file", type=['xlsx', 'xls'])
-
+    uploaded_file = st.file_uploader(
+        "Upload your own Excel file (optional)",
+        type=UPLOAD_FILE_TYPES,
+        help=REQUIRED_FIELDS_NOTE,
+    )
     if uploaded_file is not None:
-        try:
-            handler = ExcelFileHandler(uploaded_file, "1. Dataset")
-            df = handler.open_excel_file()
-
-            # Create tabs
-            tab_overview, tab_pal, tab_cebu, tab_airasia = st.tabs([
-                "Overview", 
-                "Philippine Airlines", 
-                "Cebu Pacific", 
-                "AirAsia"
-            ])
-
-            # Overview Tab
-            with tab_overview:
-                st.header("Data Overview")
-                display_general_overview(handler, df)
-            
-            # Philippine Airlines Tab
-            with tab_pal:
-                st.header("Philippine Airlines Analysis")
-                display_pal_analysis(handler)
-            
-            # Cebu Pacific Tab
-            with tab_cebu:
-                st.header("Cebu Pacific Analysis")
-                display_competitor_analysis(
-                    handler, 
-                    selected_keyword3, 
-                    selected_keyword5, 
-                    "selected_keyword3_color"
-                )
-            
-            # AirAsia Tab
-            with tab_airasia:
-                st.header("AirAsia Analysis")
-                display_competitor_analysis(
-                    handler, 
-                    selected_keyword4, 
-                    selected_keyword6, 
-                    "selected_keyword4_color"
-                )
-
-        except Exception as e:
-            st.error(f"Error: {str(e)}")
+        data_source: str | object = uploaded_file
     else:
-        st.info("Please upload an Excel file to begin the analysis.")
+        if not os.path.isfile(DEFAULT_DATA_PATH):
+            st.error(f"Default data file not found: {DEFAULT_DATA_PATH}")
+            return
+        data_source = DEFAULT_DATA_PATH
+
+    try:
+        handler = ExcelFileHandler(data_source, DEFAULT_SHEET_NAME)
+        df = handler.open_excel_file()
+    except Exception as e:
+        st.error(f"Error: {e!s}")
+        return
+
+    tab_overview, tab_pal, tab_cebu, tab_airasia = st.tabs([
+        "Overview",
+        "Philippine Airlines",
+        "Cebu Pacific",
+        "AirAsia",
+    ])
+
+    with tab_overview:
+        st.header("Data Overview")
+        display_general_overview(
+            handler,
+            df,
+            overview_keywords=overview_keywords,
+            brand_keywords=[kw1, kw3, kw4] if kw1 and kw3 and kw4 else overview_keywords[:3],
+            prominence_groups=[combined_keywords, combined_keywords1, combined_keywords2],
+        )
+
+    with tab_pal:
+        st.header("Philippine Airlines Analysis")
+        if kw1 and kw2:
+            display_pal_analysis(handler, kw1, kw2, "selected_keyword1_color")
+
+    with tab_cebu:
+        st.header("Cebu Pacific Analysis")
+        if kw3 and kw5:
+            display_competitor_analysis(
+                handler, kw3, kw5, "selected_keyword3_color"
+            )
+
+    with tab_airasia:
+        st.header("AirAsia Analysis")
+        if kw4 and kw6:
+            display_competitor_analysis(
+                handler, kw4, kw6, "selected_keyword4_color"
+            )
+
+
+def display_general_overview(
+    handler: ExcelFileHandler,
+    df,
+    overview_keywords: list[str],
+    brand_keywords: list[str],
+    prominence_groups: list[list[str]],
+) -> None:
+    """Render overview tab: dataframe, brand comparison, pie-to-pie, sentiment overview, prominence."""
+    st.dataframe(df)
+    display_brand_comparison(handler, brand_keywords)
+    display_pie_to_pie_analysis(handler, overview_keywords)
+    display_airlines_overview(handler, overview_keywords)
+    display_prominence_score_df(handler, prominence_groups)
+    display_prominence_score_extra(handler, prominence_groups)
+
+
+def display_pal_analysis(
+    handler: ExcelFileHandler,
+    keyword: str,
+    secondary_keyword: str,
+    color_key: str,
+) -> None:
+    """Render Philippine Airlines metrics, sentiment, trendline, and top publications/authors."""
+    display_airline_metrics(handler, keyword, secondary_keyword)
+    display_sentiment_analysis(handler, keyword)
+    display_daily_trendline(handler, keyword, color_key)
+    display_top_publications_authors(handler, keyword, color_key)
+
+
+def display_competitor_analysis(
+    handler: ExcelFileHandler,
+    keyword: str,
+    secondary_keyword: str,
+    color_key: str,
+) -> None:
+    """Render competitor airline metrics, sentiment, trendline, and top publications/authors."""
+    display_airline_metrics(handler, keyword, secondary_keyword)
+    display_sentiment_analysis(handler, keyword)
+    display_daily_trendline(handler, keyword, color_key)
+    display_top_publications_authors(handler, keyword, color_key)
+
 
 if __name__ == "__main__":
     main()
