@@ -2,6 +2,12 @@
 
 import json
 import os
+import sys
+
+# Ensure src is on path for Streamlit Cloud (repo root is cwd; script is src/app.py)
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+if _script_dir not in sys.path:
+    sys.path.insert(0, _script_dir)
 
 import pandas as pd
 import streamlit as st

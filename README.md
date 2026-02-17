@@ -62,6 +62,15 @@ The app loads the default Excel file from `data/` if present. You can optionally
 
 See the in-app tooltip for details.
 
+## Deploy on Streamlit Cloud
+
+1. Push this repo to GitHub.
+2. In [Streamlit Cloud](https://share.streamlit.io), create a new app and point it to your repo.
+3. Set **Main file path** to: `src/app.py`
+4. Leave **Advanced settings** default (the app adds `src` to the path and uses the repo root for `data/`).
+
+The app will use the `data/` folder in the repo (config, executive summary, default Excel if present).
+
 ## Dependencies
 
 - streamlit

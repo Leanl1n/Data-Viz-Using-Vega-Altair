@@ -1,9 +1,12 @@
 """Chart creation for media and sentiment analysis using Altair and Matplotlib."""
 
-import altair as alt
-import pandas as pd
+import matplotlib
+matplotlib.use("Agg")  # headless backend for Streamlit Cloud / servers
 import matplotlib.pyplot as plt
 from matplotlib.patches import ConnectionPatch
+
+import altair as alt
+import pandas as pd
 
 from .constants import (
     COLOR_MAPPING,
