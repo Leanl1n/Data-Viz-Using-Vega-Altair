@@ -16,3 +16,5 @@ REACH & VALUE
 Cumulative reach and advertising value equivalent (AVE) summarise the audience exposure and comparable value of earned media. Reporting these alongside sentiment and share of voice supports business cases for PR and communications and helps benchmark performance after major campaigns or crises.
 
 Recommendation: Maintain ongoing share-of-voice and sentiment tracking by brand; use the dashboard to spot spikes and tie them to specific events or campaigns. Run a qualitative pass on high-reach negative items to extract themes and align messaging with outlets that frame coverage positively. Prioritise relationship-building with top-tier sources and report reach and AVE in regular dashboards to demonstrate impact.
+
+CREATED BY: LERRY
