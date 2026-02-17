@@ -80,7 +80,7 @@ def display_daily_trendline(
                 ("Last 14 days", min(14, n_total)),
                 ("Last 7 days", min(7, n_total)),
             ]
-            window_labels = [f"{label} ({n} points)" for label, n in window_options]
+            window_labels = [label for label, n in window_options]
             window_idx = st.selectbox(
                 "Time window",
                 range(len(window_options)),
